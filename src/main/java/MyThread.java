@@ -6,10 +6,10 @@ class MyThread extends Thread {
 
     final static Logger logger = Logger.getLogger(MyThread.class);
 
-    static volatile int count = 0;
-    Account fromAcct;
-    Account toAcct;
-    int money;
+    private static volatile int count = 0;
+    private Account fromAcct;
+    private Account toAcct;
+    private int money;
 
     public MyThread(Account fromAcct, Account toAcct, int money) {
         this.fromAcct = fromAcct;
@@ -50,7 +50,7 @@ class MyThread extends Thread {
 
     }
 
-    public void transferMoney(Account fromAcct, Account toAcct, int money) {
+    private void transferMoney(Account fromAcct, Account toAcct, int money) {
         String fromId = fromAcct.getID();
         String toId = toAcct.getID();
         if (fromId.compareTo(toId) < 0) {
