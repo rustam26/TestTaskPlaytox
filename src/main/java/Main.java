@@ -3,20 +3,20 @@ import org.apache.log4j.Logger;
 import java.util.Random;
 
 public class Main {
-
+    final static Logger logger = Logger.getLogger(Main.class);
 
     public static void main(String[] args) throws InterruptedException {
         Random random = new Random();
 
-        Account account1 = new Account(String.valueOf(random.nextInt(10)), 10000);
-        Account account2 = new Account(String.valueOf(random.nextInt(10)), 10000);
-        Account account3 = new Account(String.valueOf(random.nextInt(10)), 10000);
-        Account account4 = new Account(String.valueOf(random.nextInt(10)), 10000);
+        Account account1 = new Account(String.valueOf(random.nextInt(1000)), 10000);
+        Account account2 = new Account(String.valueOf(random.nextInt(1000)), 10000);
+        Account account3 = new Account(String.valueOf(random.nextInt(1000)), 10000);
+        Account account4 = new Account(String.valueOf(random.nextInt(1000)), 10000);
 
 
         MyThread thread1 = new MyThread(account2, account1, random.nextInt(500));
-        MyThread thread2 = new MyThread(account1, account2, 100);
-        MyThread thread3 = new MyThread(account1, account2, 100);
+        MyThread thread2 = new MyThread(account1, account2, random.nextInt(100));
+        MyThread thread3 = new MyThread(account1, account2, random.nextInt(100));
         MyThread thread4 = new MyThread(account2, account4, random.nextInt(110));
         MyThread thread5 = new MyThread(account2, account4, random.nextInt(100));
         MyThread thread6 = new MyThread(account3, account2, random.nextInt(110));
@@ -36,82 +36,7 @@ public class Main {
         thread4.join();
         thread5.join();
         thread6.join();
-        System.out.println(account1.getMoney() + account2.getMoney() + account3.getMoney() + account4.getMoney());
+        logger.info("Сумма: "+ (account1.getMoney() + account2.getMoney() + account3.getMoney() + account4.getMoney()));
     }
 
 }
-
-class MyThread extends Thread {
-
-    final static Logger logger = Logger.getLogger(MyThread.class);
-
-    static volatile int count = 0;
-    Account fromAcct;
-    Account toAcct;
-    int money;
-
-    public MyThread(Account fromAcct, Account toAcct, int money) {
-        this.fromAcct = fromAcct;
-        this.toAcct = toAcct;
-        this.money = money;
-    }
-
-    @Override
-    public void run() {
-
-        while (true) {
-            try {
-                Thread.sleep(new Random().nextInt(2000 - 1000) + 1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            if (count <= 30) {
-
-                transferMoney(fromAcct, toAcct, money);
-                countAdd();
-
-            } else {
-                break;
-            }
-        }
-    }
-
-    private void doTransfer(Account fromAcct, Account toAcct, int money) {
-
-        if (fromAcct.getMoney() > 0 && money > 0 && money <= fromAcct.getMoney()) {
-            fromAcct.debit(money);
-            toAcct.credit(money);
-            logger.info("Из счета " + fromAcct.getID() + " сделали операцию списания, остаток: " + fromAcct.getMoney() + "." +
-                    " И на счет " + toAcct.getID() + " сделали операцию зачисление, остаток: " + toAcct.getMoney() + "." +
-                    " Сумма перевода: " + money +
-                    " Операция: " + count);
-        }
-
-    }
-
-    public void transferMoney(Account fromAcct, Account toAcct, int money) {
-        String fromId = fromAcct.getID();
-        String toId = toAcct.getID();
-        if (fromId.compareTo(toId) < 0) {
-            synchronized (fromAcct) {
-                synchronized (toAcct) {
-                    doTransfer(fromAcct, toAcct, money);
-                }
-            }
-        } else {
-            synchronized (toAcct) {
-                synchronized (fromAcct) {
-                    doTransfer(fromAcct, toAcct, money);
-                }
-            }
-        }
-
-    }
-
-    private void countAdd() {
-        synchronized (this) {
-            count++;
-        }
-    }
-}
-
