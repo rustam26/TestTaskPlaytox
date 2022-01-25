@@ -1,3 +1,5 @@
+import org.apache.log4j.Logger;
+
 import java.util.Random;
 
 public class Main {
@@ -12,12 +14,12 @@ public class Main {
         Account account4 = new Account(String.valueOf(random.nextInt(10)), 10000);
 
 
-        MyThread thread1 = new MyThread(account2, account1, random.nextInt(11000));
-        MyThread thread2 = new MyThread(account1, account2, random.nextInt(11000));
-        MyThread thread3 = new MyThread(account1, account2, random.nextInt(11000));
-        MyThread thread4 = new MyThread(account2, account4, random.nextInt(11000));
-        MyThread thread5 = new MyThread(account2, account4, random.nextInt(11000));
-        MyThread thread6 = new MyThread(account3, account2, random.nextInt(11000));
+        MyThread thread1 = new MyThread(account2, account1, random.nextInt(500));
+        MyThread thread2 = new MyThread(account1, account2, 100);
+        MyThread thread3 = new MyThread(account1, account2, 100);
+        MyThread thread4 = new MyThread(account2, account4, random.nextInt(110));
+        MyThread thread5 = new MyThread(account2, account4, random.nextInt(100));
+        MyThread thread6 = new MyThread(account3, account2, random.nextInt(110));
 
 
         thread1.start();
@@ -27,24 +29,21 @@ public class Main {
         thread5.start();
         thread6.start();
 
+
         thread1.join();
         thread2.join();
         thread3.join();
         thread4.join();
         thread5.join();
         thread6.join();
-
-
-        System.out.println(account1.getMoney());
-        System.out.println(account2.getMoney());
-        System.out.println(account3.getMoney());
-        System.out.println(account4.getMoney());
-        System.out.println(account1.getMoney()+account2.getMoney()+account3.getMoney()+account4.getMoney());
+        System.out.println(account1.getMoney() + account2.getMoney() + account3.getMoney() + account4.getMoney());
     }
 
 }
 
 class MyThread extends Thread {
+
+    final static Logger logger = Logger.getLogger(MyThread.class);
 
     static volatile int count = 0;
     Account fromAcct;
@@ -66,14 +65,12 @@ class MyThread extends Thread {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            if (count < 30) {
+            if (count <= 30) {
 
                 transferMoney(fromAcct, toAcct, money);
                 countAdd();
 
             } else {
-
-                System.out.println(count);
                 break;
             }
         }
@@ -81,12 +78,13 @@ class MyThread extends Thread {
 
     private void doTransfer(Account fromAcct, Account toAcct, int money) {
 
-        if (fromAcct.getMoney() > 0 && money > 0 && money <= fromAcct.getMoney()){
+        if (fromAcct.getMoney() > 0 && money > 0 && money <= fromAcct.getMoney()) {
             fromAcct.debit(money);
             toAcct.credit(money);
-            System.out.println(this.getName());
-        } else{
-
+            logger.info("Из счета " + fromAcct.getID() + " сделали операцию списания, остаток: " + fromAcct.getMoney() + "." +
+                    " И на счет " + toAcct.getID() + " сделали операцию зачисление, остаток: " + toAcct.getMoney() + "." +
+                    " Сумма перевода: " + money +
+                    " Операция: " + count);
         }
 
     }
